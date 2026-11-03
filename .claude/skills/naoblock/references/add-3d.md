@@ -36,7 +36,27 @@ halloween/pipeline_hw.sh <入力_solid.json> <タグ>  # 形を直接描いた�
 - 「4 ポチ以上で下に 1 ポチだけ」も、多ければ見直す
 - パーツの数・色ごとの数も、ここで報告する
 
-## 4. アプリ用のファイルを作る
+## 4. 組立図を画像にして見せる（必須）
+
+宙づりチェックを通ったら、**サイトに載せる前に**組立図を 1 枚の画像にして、なおなおに見せる。完成図・部品リスト・全段の上から図（下が手前、ひとつ下の段はうすい灰色）が入る。
+
+```sh
+.venv/bin/python sample/make_guide_image.py bricks/plan_C_<タグ>.json <フォルダ>/guide_<名前>.png "作品名"
+```
+
+- 画像は自分でも開いて見る：形が元の絵どおりか、**塗り替えで模様が欠けていないか**（`--recolor` は細い線や 1 マスの点を別の色にすることがある。欠けたら `--recolor` なしで `decompose.py` を流し直し、もう一度宙づりチェック）
+- Discord の bot から頼まれたときは、画像を Discord に送る（bot は文字しか返せないので、`discord-bot/.env` のトークンで REST API に直接送る。チャンネル ID は、なおなおが貼った添付 URL の `attachments/<ID>/` から読む）
+
+```sh
+set -a && . ~/Desktop/secretary/discord-bot/.env && set +a
+curl -s -X POST "https://discord.com/api/v10/channels/<チャンネルID>/messages" -H "Authorization: Bot $DISCORD_BOT_TOKEN" \
+  -F 'payload_json={"content":"<作品名>の組立図です（<パーツ数>パーツ・<段数>段・宙づり0）"}' -F "files[0]=@<画像>"
+```
+
+- パソコンの前にいるときは、チャットに画像のパスを書いて、Read で見せる
+- サイトに載せるか（タブに登録するか）は、画像を見てもらってから決める。ロゴなど他社の絵は、載せる前に使ってよいか確かめる
+
+## 5. アプリ用のファイルを作る
 
 ```sh
 .venv/bin/python sample/build.py plan_C_<タグ> plan_<名前>.js   # → sample/plan_<名前>.js
@@ -45,7 +65,7 @@ halloween/pipeline_hw.sh <入力_solid.json> <タグ>  # 形を直接描いた�
 
 できた `plan_<名前>.js` と `thumb_<名前>.png` を `~/dev/naoblock-builder-3d` にコピーする。
 
-## 5. タブに登録する
+## 6. タブに登録する
 
 `index.html` と `game.html` の **両方**にある `CHARS` に 1 行足す（片方だけだと、選べるのに遊べない）。
 
@@ -56,7 +76,7 @@ halloween/pipeline_hw.sh <入力_solid.json> <タグ>  # 形を直接描いた�
 - `cat` はタブ（`ninja` `cnp` `halloween` …）。期間限定のタブは `until` を付ける
 - 新しい色を使うときは、パレットに色があるか確かめる（ミタマでライトブルーを足した）
 
-## 6. 遊んで確かめる → PR
+## 7. 遊んで確かめる → PR
 
 - 組立ガイド：1 段ずつ見て、宙に浮いているパーツがないこと
 - ゲーム：最後まで組めて完成画面が出ること（近道は `TEMPTEST`）、♥・コンボが出ること
